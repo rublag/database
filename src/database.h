@@ -121,6 +121,63 @@ class Database
         }
         return true;
     }
+    
+    Group::Query makeGroupQuery(Query &q)
+    {
+        auto gq = Group::Query {};
+        gq.name = q.name;
+        gq.phone = q.phone;
+        
+        switch(query.name())
+        {
+            case Query::Operator::Eq:
+                gq.nameOp = Group::Query::Operator::Eq;
+                break;
+            case Query::Operator::Ne:
+                gq.nameOp = Group::Query::Operator::Ne;
+                break;
+            case Query::Operator::Lt:
+                gq.nameOp = Group::Query::Operator::Lt;
+                break;
+            case Query::Operator::Le:
+                gq.nameOp = Group::Query::Operator::Le;
+                break;
+            case Query::Operator::Gt:
+                gq.nameOp = Group::Query::Operator::Gt;
+                break;
+            case Query::Operator::Ge:
+                gq.nameOp = Group::Query::Operator::Ge;
+                break;
+            case Query::Operator::Nil:
+                gq.nameOp = Group::Query::Operator::Nil;
+                break;
+        }
+        
+        switch(query.phone())
+        {
+            case Query::Operator::Eq:
+                gq.phoneOp = Group::Query::Operator::Eq;
+                break;
+            case Query::Operator::Ne:
+                gq.phoneOp = Group::Query::Operator::Ne;
+                break;
+            case Query::Operator::Lt:
+                gq.phoneOp = Group::Query::Operator::Lt;
+                break;
+            case Query::Operator::Le:
+                gq.phoneOp = Group::Query::Operator::Le;
+                break;
+            case Query::Operator::Gt:
+                gq.phoneOp = Group::Query::Operator::Gt;
+                break;
+            case Query::Operator::Ge:
+                gq.phoneOp = Group::Query::Operator::Ge;
+                break;
+            case Query::Operator::Nil:
+                gq.phoneOp = Group::Query::Operator::Nil;
+                break;
+        }
+    }
 public:
     class SearchIterator;
     query(const DatabaseQuery &query)
@@ -143,37 +200,79 @@ public:
         names.index(git);
     }
 
-    cursor remove(const DatabaseCursor cursor)
+    void remove(Query query)
     {
-
-    }
-};
-
-class SearchIterator
-{
-    ???iterator it;
-    DatabaseQuery &query;
-
-public:
-    SearchIterator(DatabaseQuery &q) : query(q);
-
-    const SearhIterator &operator++()
-    {
-        while(!end(it))
+        if(!query.groupOp && query.nameOp)
         {
-            ++it;
-            if(test(*it, query))
+            ;
+        }
+        if(!query.groupOp)
+        {
+            auto it = groups.begin();
+            auto gq = makeGroupQuery(query);
+            while(it != groups.end())
             {
-                return it;
+                it->remove(query);
+                ++it;
             }
         }
-        return it;
     }
-
-    Record &operator*()
+    
+    Iterator select(Query query)
     {
-        return *it;
-    }        
+        if(query.groupOp)
+        {
+            auto gq = makeGroupQuery(query);
+            auto it = groups.begin();
+            while(it != groups.end())
+            {
+                auto it = group->select(gq);
+                while(!it.end())
+                {
+                    
+                }
+            }
+        }
+    }
 };
+
+class Database::Iterator
+{
+public:
+    const Iterator &operator++() =0;
+    Record &operator*() =0;
+    
+    NameIndex index()
+};
+
+class Database::IteratorGroup : Database::Iterator
+{
+    Groups::iterator it;
+    Group::iterator gi;
+    Group::Query gq;
+    Database::Query;
+   
+public:
+    virtual const Database::IteratorGroup &operator++()
+    {
+        while(it != groups.end())
+        {
+            while(!gi.end())
+            {
+                ++gi;
+                if(test(gi))
+                    return *this;
+            }
+            ++it;
+            auto gq = makeGroupQuery(query);
+            gi = it->select(
+            if(test(it))
+                return *this;
+        }
+        return *this;
+    }
+    
+    virtual Group::Iterator;
+}
 
 #endif
