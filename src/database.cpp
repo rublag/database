@@ -1,22 +1,208 @@
-#include "database.h"
+#include "external_index.h"
 #include "record.h"
+#include "database.h"
+#include "groups.h"
+#include "group.h"
+#include "records.h"
 
-DatabaseCursor Database::query(const DatabaseQuery &query)
+bool Database::test(const Record &record, const Database::Query &query) const
 {
-    // TODO Impement //
+    switch(query.nameOp)
+    {
+    case Query::Operator::Nil:
+        break;
+    case Query::Operator::Eq:
+        if(std::strcmp(query.name, record.name()) != 0)
+            return false;
+        break;
+    case Query::Operator::Ne:
+        if(std::strcmp(query.name, record.name()) == 0)
+            return false;
+        break;
+    case Query::Operator::Lt:
+        if(std::strcmp(query.name, record.name()) >= 0)
+            return false;
+        break;
+    case Query::Operator::Le:
+        if(std::strcmp(query.name, record.name()) > 0)
+            return false;
+        break;
+    case Query::Operator::Gt:
+        if(std::strcmp(query.name, record.name()) <= 0)
+            return false;
+        break;
+    case Query::Operator::Ge:
+        if(std::strcmp(query.name, record.name()) < 0)
+            return false;
+        break;
+    }
+
+    switch(query.groupOp)
+    {
+    case Query::Operator::Nil:
+        break;
+    case Query::Operator::Eq:
+        if(query.group != record.group())
+            return false;
+        break;
+    case Query::Operator::Ne:
+        if(query.group == record.group())
+            return false;
+        break;
+    case Query::Operator::Lt:
+        if(query.group >= record.group())
+            return false;
+        break;
+    case Query::Operator::Le:
+        if(query.group > record.group())
+            return false;
+        break;
+    case Query::Operator::Gt:
+        if(query.group <= record.group())
+            return false;
+        break;
+    case Query::Operator::Ge:
+        if(query.group < record.group())
+            return false;
+        break;
+    }
+
+    switch(query.phoneOp)
+    {
+    case Query::Operator::Nil:
+        break;
+    case Query::Operator::Eq:
+        if(query.phone != record.phone())
+            return false;
+        break;
+    case Query::Operator::Ne:
+        if(query.phone == record.phone())
+            return false;
+        break;
+    case Query::Operator::Lt:
+        if(query.phone >= record.phone())
+            return false;
+        break;
+    case Query::Operator::Le:
+        if(query.phone > record.phone())
+            return false;
+        break;
+    case Query::Operator::Gt:
+        if(query.phone <= record.phone())
+            return false;
+        break;
+    case Query::Operator::Ge:
+        if(query.phone < record.phone())
+            return false;
+        break;
+    }
+    return true;
 }
 
-bool Database::insert(Record &&record)
+Group::Query Database::makeGroupQuery(Database::Query &query)
 {
-    // Sorted DList of groups. Each group has container and AVL by name. Global AVL by name
+    auto gq = Group::Query {};
+    gq.name = query.name;
+    gq.phone = query.phone;
 
-    auto inserted_record = groups.insert(record);
-    nameIndex.index(inserted_record);
+    switch(query.nameOp)
+    {
+    case Query::Operator::Eq:
+        gq.nameOp = Group::Query::Operator::Eq;
+        break;
+    case Query::Operator::Ne:
+        gq.nameOp = Group::Query::Operator::Ne;
+        break;
+    case Query::Operator::Lt:
+        gq.nameOp = Group::Query::Operator::Lt;
+        break;
+    case Query::Operator::Le:
+        gq.nameOp = Group::Query::Operator::Le;
+        break;
+    case Query::Operator::Gt:
+        gq.nameOp = Group::Query::Operator::Gt;
+        break;
+    case Query::Operator::Ge:
+        gq.nameOp = Group::Query::Operator::Ge;
+        break;
+    case Query::Operator::Nil:
+        gq.nameOp = Group::Query::Operator::Nil;
+        break;
+    }
+
+    switch(query.phoneOp)
+    {
+    case Query::Operator::Eq:
+        gq.phoneOp = Group::Query::Operator::Eq;
+        break;
+    case Query::Operator::Ne:
+        gq.phoneOp = Group::Query::Operator::Ne;
+        break;
+    case Query::Operator::Lt:
+        gq.phoneOp = Group::Query::Operator::Lt;
+        break;
+    case Query::Operator::Le:
+        gq.phoneOp = Group::Query::Operator::Le;
+        break;
+    case Query::Operator::Gt:
+        gq.phoneOp = Group::Query::Operator::Gt;
+        break;
+    case Query::Operator::Ge:
+        gq.phoneOp = Group::Query::Operator::Ge;
+        break;
+    case Query::Operator::Nil:
+        gq.phoneOp = Group::Query::Operator::Nil;
+        break;
+    }
+    return gq;
 }
 
-bool Database::remove(const DatabaseCursor &cursor)
+void Database::insert(Record &&record)
 {
-    auto &record = cursor.get();
-    nameIndex.remove(record);
-    
+    auto it = groups.find(record.group());
+    if(it == groups.end())
+    {
+        Group group(record.group());
+        it = groups.insert(std::move(group));
+    }
+    auto &grp = it->insert(std::move(record));
+    names.insert(&grp);
+}
+
+typename Database::iterator Database::erase(typename Database::iterator it)
+{
+    auto tmp = it;
+    ++it;
+    erase(*tmp);
+    return it;
+}
+
+typename Database::iterator Database::select(Database::Query query)
+{
+    if(query.nameOp != Query::Operator::Nil)
+    {
+        switch(query.nameOp)
+        {
+        case Query::Operator::Eq:
+        case Query::Operator::Gt:
+        case Query::Operator::Ge:
+        {
+            auto lower = names.lower_bound(query.name);
+            auto it = iterator(lower, query);
+            return it;
+        }
+        case Query::Operator::Ne:
+        case Query::Operator::Lt:
+        case Query::Operator::Le:
+        default:
+        {
+            auto lower = names.begin();
+            auto it = iterator(lower, query);
+            return it;
+        }
+        }
+    }
+    auto lower = groups.begin();
+    auto it = iterator(lower, query);
+    return it;
 }

@@ -6,6 +6,6 @@
 #include "dlist.h"
 #include "record.h"
 
-using RecordList = DList<Record>
+using RecordList = DList<Record>;
 
 #endif

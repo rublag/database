@@ -10,7 +10,7 @@
 #include "record.h"
 #include "records.h"
 
-bool less(RecordList::iterator &a, RecordList::Iterator &b)
+bool less(const RecordList::iterator &a, const RecordList::Iterator &b)
 {
     auto c = std::strcmp(a->name(), b->name());
     return c < 0;
@@ -24,7 +24,12 @@ public:
         auto tmp = it;
         insert(std::move(tmp));
     }
+    using AvlTree::iterator;
+    using AvlTree::begin;
+    using AvlTree::end;
 
+    using AvlTree::lower_bound;
+    using AvlTree::upper_bound;
 
 };
 

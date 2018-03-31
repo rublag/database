@@ -28,8 +28,7 @@ public:
 
     void insert(T&& data);
     bool remove(const T& data);
-    void erase(const T& data) {remove(data);}
-    T *search(const T& data);
+    //T *search(const T& data);
 
     iterator begin() const;
     iterator end() const;
@@ -37,13 +36,6 @@ public:
     iterator lower_bound(const T& data) const;
     iterator upper_bound(const T& data) const;
 
-    template <typename Key>
-    iterator lower_bound(const Key &key) const;
-    template <typename Key>
-    iterator upper_bound(const Key &key) const;
-    iterator erase(iterator it);
-    template <typename Key>
-    iterator find(const Key &key) const;
 private:
     void rotateLeftSmall(Node *);
     void rotateLeftBig(Node *);
@@ -77,7 +69,7 @@ struct AvlTree<T, less>::Node
     ~Node();
     void insert(T&& data);
     bool remove(const T& data);
-    T* find(const T& data);
+    /*T* find(const T& data);*/
     Node(const Node&) = delete;
     Node &operator=(const Node&) = delete;
     Node(Node&&) = delete;
@@ -101,40 +93,7 @@ struct AvlTree<T, less>::Node::Inner
         prev = next = nullptr;
     }
 };
-
-template <typename T, bool less(const T& t1, const T& t2)>
-class AvlTree<T, less>::RecordIterator
-{
-    friend class AvlTree<T, less>;
-private:
-    Node *pos = nullptr;
-    typename Node::Inner *inn = nullptr;
-    bool end = false;
-
-public:
-    // Iterator traits:
-    using difference_type = std::ptrdiff_t;
-    using value_type = T;
-    using pointer = T*;
-    using reference = T&;
-    using iterator_category = std::bidirectional_iterator_tag;
-    const RecordIterator &operator++();
-    const RecordIterator &nextNode();
-    reference operator*();
-    pointer operator->();
-    bool operator==(const RecordIterator &rhs) const;
-    bool operator!=(const RecordIterator &rhs) const;
-    RecordIterator();
-    RecordIterator(Node *pos, typename Node::Inner *inn = nullptr, bool atEnd = false);
-    bool atEnd() const;
-
-private:
-    Node *nextNodePtr();
-};
-
-
 #include "avl_tree.hpp"
 #include "avl_tree_node.hpp"
 #include "avl_tree_iterator.hpp"
-
 #endif

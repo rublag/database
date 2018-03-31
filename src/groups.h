@@ -8,7 +8,6 @@
 
 class GroupList : private DList<Group>
 {
-    NameIndex names;
 public:
     using DList<Group>::iterator;
     using DList<Group>::erase;
@@ -17,62 +16,12 @@ public:
     using DList<Group>::begin;
     using DList<Group>::end;
 
-    iterator insert(Group &&group)
-    {
-        for(auto it = begin(); it != end(); ++it)
-        {
-            if(*it > group)
-                return insert(it, std::move(group));
-        }
-        return insert(end(), std::move(group));
-    }
-
-    iterator insert(Record &&record)
-    {
-        auto it = lower_bound(record.group);
-        if(it != end() && *it == record.group)
-        {
-            it->insert(std::move(record));
-        }
-        else
-        {
-            group = new Group;
-            group.insert(record);
-            it = insert(it, std::move(group));
-        }
-        names.insert(it);
-        return it;
-    }
-
-    iterator find(int key)
-    {
-        for(auto it = begin(); it != end(); ++it)
-        {
-            if(*it == key)
-                return it;
-        }
-        return end();
-    }
-
-    iterator lower_bound(int key)
-    {
-        for(auto it = begin(); it != end(); ++it)
-        {
-            if(*it >= key)
-                return it;
-        }
-        return end();
-    }
-
-    iterator upper_bound(int key)
-    {
-        for(auto it = begin(); it != end(); ++it)
-        {
-            if(*it > key)
-                return it;
-        }
-        return end();
-    }
-}
-
+    iterator insert(Group &&group);
+    iterator insert(Record &&record);
+    iterator find(int key);
+    iterator lower_bound(int key);
+    iterator upper_bound(int key);
+private:
+    using DList<Group>::insert;
+};
 #endif
