@@ -55,6 +55,8 @@ Record::Record(char *name, int group, int phone)
     char *str = new char[std::strlen(name)+1];
     std::strcpy(str, name);
     _name = str;
+    _group = group;
+    _phone = phone;
 }
 
 Record::~Record() {}

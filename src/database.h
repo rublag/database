@@ -14,13 +14,13 @@ class Database
     ExternalIndex  names;
 
     bool test(const Record &record, const Query &query) const;
-    Group::Query makeGroupQuery(Query &q);
+    static Group::Query makeGroupQuery(Query &q);
 public:
     class Iterator;
     using iterator = Iterator;
     class SearchIterator;
     void insert(Record &&record);
-    void remove(Query query);
+    void remove(const Query &query);
     iterator select(Query query);
     iterator erase(iterator it);
     void erase(const Record &record);
@@ -56,6 +56,7 @@ public:
 
     Iterator(ExternalIndex::iterator lower, Query q);
     Iterator(GroupList::iterator lower, Query q);
+    bool atEnd();
 
 private:
     void getFirstMatch();

@@ -101,7 +101,7 @@ bool Database::test(const Record &record, const Database::Query &query) const
 
 Group::Query Database::makeGroupQuery(Database::Query &query)
 {
-    auto gq = Group::Query {};
+    Group::Query gq;
     gq.name = query.name;
     gq.phone = query.phone;
 
@@ -169,6 +169,15 @@ void Database::insert(Record &&record)
     names.insert(&grp);
 }
 
+void Database::remove(const Query &query)
+{
+    auto it = select(query);
+    while(!it.atEnd())
+    {
+        it = erase(it);
+    }
+}
+
 typename Database::iterator Database::erase(typename Database::iterator it)
 {
     auto tmp = it;
@@ -205,4 +214,16 @@ typename Database::iterator Database::select(Database::Query query)
     auto lower = groups.begin();
     auto it = iterator(lower, query);
     return it;
+}
+
+void Database::erase(const Record &record)
+{
+    auto it = names.find(record);
+    if(it.atEnd())
+        return;
+
+    auto group_num = (*it)->group();
+    auto &group = *(groups.find(group_num));
+    group.erase(record);
+    names.erase(it);
 }

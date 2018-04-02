@@ -1,4 +1,3 @@
-
 #ifndef GROUP_H
 #define GROUP_H
 
@@ -25,6 +24,7 @@ public:
     void erase(const Record &record);
 
     Group(int group);
+    Group(Group&&);
 };
 
 struct Group::Query
@@ -50,9 +50,11 @@ class Group::Iterator
 public:
     const Iterator &operator++();
     Record &operator*();
+    bool atEnd();
 
     Iterator(InternalIndex::iterator lower, Query q);
     Iterator(RecordList::iterator lower, Query q);
+    Iterator();
 
 private:
     void getFirstMatch();

@@ -6,30 +6,22 @@
 
 #include <cstring>
 
-bool less(const Record * const &r1, const Record * const &r2)
-{
-    auto cmp = std::strcmp(r1->name(), r2->name());
-    return cmp < 0;
-}
-
+bool less(Record * const &r1, Record * const &r2);
 struct Key
 {
     char *str;
 };
+bool operator<(const Key &key, const Record * const &rec);
+bool operator<(const Record * const &rec, const Key &key);
 
-bool operator<(const Key &key, const Record * const &rec)
-{
-    return std::strcmp(key.str, rec->name()) < 0;
-}
+bool operator==(const Record * const &ptr, const Record &rec);
+bool operator==(const Record &rec, const Record * const &ptr);
+bool operator<(const Record *const &ptr, const Record &rec);
+bool operator<(const Record &rec, const Record *const &ptr);
 
-bool operator<(const Record * const &rec, const Key &key)
+class ExternalIndex : private AvlTree<Record*, less>
 {
-    return std::strcmp(rec->name(), key.str) < 0;
-}
-
-class ExternalIndex : private AvlTree<const Record*, less>
-{
-    using Base = AvlTree<const Record*, less>;
+    using Base = AvlTree<Record*, less>;
     using Base::lower_bound;
     using Base::upper_bound;
 
@@ -38,6 +30,8 @@ public:
     using Base::begin;
     using Base::end;
     using Base::insert;
+    using Base::find;
+    using Base::erase;
 
     iterator lower_bound(char *name);
     iterator upper_bound(char *name);

@@ -75,9 +75,13 @@ public:
     bool operator!=(const Iterator &rhs) const;
     Iterator();
     Iterator(Node *pos, bool end = false);
+    bool atEnd();
 };
 
 template <typename T>
 void swap(DList<T> &a, DList<T> &b);
+
+#include "dlist.hpp"
+#include "dlist_iterator.hpp"
 
 #endif

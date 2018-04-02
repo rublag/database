@@ -27,7 +27,6 @@ typename GroupList::iterator GroupList::insert(Record &&record)
         group.insert(std::move(record));
         it = insert(it, std::move(group));
     }
-    names.insert(it);
     return it;
 }
 

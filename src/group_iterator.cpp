@@ -6,12 +6,14 @@ void Group::Iterator::getFirstMatch()
         ++(*this);
 }
 
-Group::Iterator::Iterator(NameIndex::iterator lower, Query q) : names_iterator(lower), query(q), uses(Uses::Name)
+Group::Iterator::Iterator() : uses(Uses::Nil) {}
+
+Group::Iterator::Iterator(InternalIndex::iterator lower, Query q) : query(q), names_iterator(lower), uses(Uses::Name)
 {
     getFirstMatch();
 }
 
-Group::Iterator::Iterator(RecordList::iterator lower, Query q) : records_iterator(lower), query(q), uses(Uses::Records)
+Group::Iterator::Iterator(RecordList::iterator lower, Query q) : query(q), records_iterator(lower), uses(Uses::Records)
 {
     getFirstMatch();
 }
@@ -19,7 +21,7 @@ Group::Iterator::Iterator(RecordList::iterator lower, Query q) : records_iterato
 Record &Group::Iterator::operator*()
 {
     if(uses == Uses::Name)
-        return *names_iterator;
+        return **names_iterator;
     return *records_iterator;
 }
 
@@ -111,4 +113,9 @@ bool Group::Iterator::match(const Record &record) const
     }
 
     return true;
+}
+
+bool Group::Iterator::atEnd()
+{
+    return end;
 }

@@ -17,9 +17,7 @@ public:
 
 private:
     Database &database;
-
-    void remove(const Command &cmd);
-    void select(const Command &cmd);
+    void action(const Command &cmd, bool remove);
     void insert(const Command &cmd);
 };
 

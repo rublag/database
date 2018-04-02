@@ -6,12 +6,12 @@ void Database::Iterator::getFirstMatch()
         ++(*this);
 }
 
-Database::Iterator::Iterator(ExternalIndex::iterator lower, Query q) : names_iterator(lower), query(q), uses(Uses::Name)
+Database::Iterator::Iterator(ExternalIndex::iterator lower, Query q) : query(q), names_iterator(lower), uses(Uses::Name)
 {
     getFirstMatch();
 }
 
-Database::Iterator::Iterator(GroupList::iterator lower, Query q) : groups_iterator(lower), query(q), uses(Uses::Groups)
+Database::Iterator::Iterator(GroupList::iterator lower, Query q) : query(q), groups_iterator(lower), uses(Uses::Groups)
 {
     getFirstMatch();
 }
@@ -19,7 +19,7 @@ Database::Iterator::Iterator(GroupList::iterator lower, Query q) : groups_iterat
 Record &Database::Iterator::operator*()
 {
     if(uses == Uses::Name)
-        return *names_iterator;
+        return **names_iterator;
     return *group_iterator;
 }
 
@@ -43,7 +43,7 @@ const typename Database::Iterator &Database::Iterator::operator++()
             else
             {
                 ++groups_iterator;
-                group_iterator = groups_iterator->search(make_query(query));
+                group_iterator = groups_iterator->select(Database::makeGroupQuery(query));
             }
             if(groups_iterator.atEnd() && group_iterator.atEnd())
                 end = true;
@@ -117,4 +117,9 @@ bool Database::Iterator::match(const Record &record) const
     }
 
     return true;
+}
+
+bool Database::Iterator::atEnd()
+{
+    return end;
 }

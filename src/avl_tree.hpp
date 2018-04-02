@@ -241,7 +241,7 @@ void AvlTree<T, less>::deleteLeaf(typename AvlTree<T, less>::Node *node)
     auto x = n->parent;
     while(x)
     {
-        auto g = x->parent;
+        //auto g = x->parent;
         if(x->left == n)
         {
             if(x->balance > 0)

@@ -5,10 +5,9 @@
 #include "database.h"
 #include "record.h"
 
-static bool test_record(const Record &record, const Command &command)
+static bool test_record(const Record &, const Command &)
 {
-    return false;
-    // len' pisat'
+    return true;
 }
 
 static void print_record(const Record &record, const Command &command)
@@ -61,25 +60,24 @@ static void invert(Condition &cond)
     case Condition::Ge:
         cond.type = Condition::Lt;
         break;
+    default:
+        break;
     }
 }
 
 void Engine::runStatement(const Command &command)
 {
     // dlist of groups. each groups contains container with records, avl for name and linear search for phone. Global avl for name.
-
-    DatabaseQuery db_query;
-
     switch(command.type)
     {
     case Command::Insert:
         insert(command);
         break;
     case Command::Delete:
-        remove(command);
+        action(command, true);
         break;
     case Command::Select:
-        select(command);
+        action(command, false);
         break;
     case Command::Quit:
         this->~Engine();
@@ -112,35 +110,37 @@ static bool command_has_cond(const Command &command, Condition::Left left, Condi
     return false;
 }
 
-static DatabaseQuery make_db_query(const Command &command)
+static Database::Query make_db_query(const Command &command)
 {
-    DatabaseQuery query;
+    Database::Query query;
     for(int i = 0; i < 3; ++i)
     {
-        DatabaseQuery::Operator tmp;
+        Database::Query::Operator tmp;
         switch(command.cond[i].type)
         {
         case Condition::Eq:
-            tmp = DatabaseQuery::Operator::Eq;
+            tmp = Database::Query::Operator::Eq;
             break;
         case Condition::Gt:
-            tmp = DatabaseQuery::Operator::Gt;
+            tmp = Database::Query::Operator::Gt;
             break;
         case Condition::Lt:
-            tmp = DatabaseQuery::Operator::Lt;
+            tmp = Database::Query::Operator::Lt;
             break;
         case Condition::Ge:
-            tmp = DatabaseQuery::Operator::Ge;
+            tmp = Database::Query::Operator::Ge;
             break;
         case Condition::Le:
-            tmp = DatabaseQuery::Operator::Le;
+            tmp = Database::Query::Operator::Le;
             break;
         case Condition::Ne:
-            tmp = DatabaseQuery::Operator::Ne;
+            tmp = Database::Query::Operator::Ne;
             break;
         case Condition::Like:
-            tmp = DatabaseQuery::Operator::Ge;
+            tmp = Database::Query::Operator::Ge;
             break;
+        case Condition::Nil:
+            tmp = Database::Query::Operator::Nil;
         }
 
         switch(command.cond[i].left)
@@ -157,11 +157,14 @@ static DatabaseQuery make_db_query(const Command &command)
             query.phoneOp = tmp;
             query.phone = command.cond[i].value;
             break;
+        default:
+            break;
         }
     }
+    return query;
 }
 
-void Engine::select(const Command &command)
+void Engine::action(const Command &command, bool remove)
 {
     // dlist of groups. each groups contains container with records, avl for name and linear search for phone. Global avl for name.
 
@@ -194,13 +197,13 @@ void Engine::select(const Command &command)
                 cmd1.andSet[0] = 1;
                 invert(cmd1.cond[1]);
                 cmd2.cond[0] = cmd2.cond[1];
-                cmd2.cond[1] = {};
+                cmd2.cond[1] = Condition();
             }
             else
             {
                 cmd1.andSet[0] = 1;
                 invert(cmd1.cond[0]);
-                cmd2.cond[1] = {};
+                cmd2.cond[1] = Condition();
             }
         }
         else
@@ -208,18 +211,28 @@ void Engine::select(const Command &command)
             cmd1.andSet[0] = 1;
             invert(cmd1.cond[1]);
             cmd2.cond[0] = cmd2.cond[1];
-            cmd2.cond[1] = {};
+            cmd2.cond[1].type = Condition();
         }
 
-        select(cmd1);
-        select(cmd2);
+        action(cmd1, remove);
+        action(cmd2, remove);
+        return;
     }
 
-    auto db_query = make_db_query(command);
-    for(auto db_cursor = database.query(db_query); !db_cursor.end(); db_cursor.next())
+    auto query = make_db_query(command);
+    if(!remove)
     {
-        auto &record = db_cursor.get();
-        if(test_record(record, command))
-            print_record(record, command);
+        for(auto it = database.select(query); !it.atEnd(); ++it)
+        {
+            auto &record = *it;
+            if(test_record(record, command))
+                print_record(record, command);
+        }
+    }
+    else
+    {
+        database.remove(query);
     }
 }
+
+Engine::Engine(Database &db) : database(db) {}

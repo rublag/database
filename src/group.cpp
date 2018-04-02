@@ -88,4 +88,7 @@ bool operator==(int i, const Group &g)
     return g == i;
 }
 
-
+Group::Group(Group &&rhs)
+{
+    _group = rhs._group;
+}
