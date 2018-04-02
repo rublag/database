@@ -211,7 +211,7 @@ void Engine::action(const Command &command, bool remove)
             cmd1.andSet[0] = 1;
             invert(cmd1.cond[1]);
             cmd2.cond[0] = cmd2.cond[1];
-            cmd2.cond[1].type = Condition();
+            cmd2.cond[1] = Condition();
         }
 
         action(cmd1, remove);
