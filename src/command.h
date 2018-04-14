@@ -16,7 +16,7 @@ struct Condition
 struct Command
 {
     enum Type {
-        Insert, Select, Delete, Quit, ErrParser
+        Insert, Select, Delete, Quit, ErrParser, Stop
     } type;
 
     char *name;

@@ -6,6 +6,9 @@ int Lexer::refillBuffer()
 {
     readBufferPosition = -1;
     input.getline(readBuffer, LEXER_BUFFER_SIZE-1);
+    /////////////////DEBUG//////////////
+    //std::cerr << readBuffer << std::endl;
+    /////////////////DEBUG//////////////
     if(input.eof())
     {
         if(input.gcount())
@@ -114,6 +117,12 @@ Token Lexer::nextToken()
     else if(!inParentheses && len == 6 && strncmp(word, "delete", 6) == 0)
     {
         token.type = Token::Delete;
+        token.value = nullptr;
+        return token;
+    }
+    else if(!inParentheses && len == 4 && strncmp(word, "stop", 4) == 0)
+    {
+        token.type = Token::Stop;
         token.value = nullptr;
         return token;
     }

@@ -84,9 +84,9 @@ void AvlTree<T, less>::rotateRight(typename AvlTree<T, less>::Node *top)
 }
 
 template <typename T, bool less(const T& t1, const T& t2)>
-void AvlTree<T, less>::rotateLeftSmall(typename AvlTree<T, less>::Node *top)
+typename AvlTree<T, less>::Node *AvlTree<T, less>::rotateLeftSmall(typename AvlTree<T, less>::Node *top)
 {
-    auto newTop = top->left;
+    auto newTop = top->right;
     rotateLeft(top);
 
     if(newTop->balance == 0)
@@ -97,14 +97,15 @@ void AvlTree<T, less>::rotateLeftSmall(typename AvlTree<T, less>::Node *top)
     else
     {
         newTop->balance = 0;
-        newTop->balance = 0;
+        top->balance = 0;
     }
+    return newTop;
 }
 
 template <typename T, bool less(const T& t1, const T& t2)>
-void AvlTree<T, less>::rotateRightSmall(typename AvlTree<T, less>::Node *top)
+typename AvlTree<T, less>::Node *AvlTree<T, less>::rotateRightSmall(typename AvlTree<T, less>::Node *top)
 {
-    auto newTop = top->right;
+    auto newTop = top->left;
     rotateRight(top);
 
     if(newTop->balance == 0)
@@ -115,12 +116,13 @@ void AvlTree<T, less>::rotateRightSmall(typename AvlTree<T, less>::Node *top)
     else
     {
         newTop->balance = 0;
-        newTop->balance = 0;
+        top->balance = 0;
     }
+    return newTop;
 }
 
 template <typename T, bool less(const T& t1, const T& t2)>
-void AvlTree<T, less>::rotateLeftBig(typename AvlTree<T, less>::Node *top)
+typename AvlTree<T, less>::Node *AvlTree<T, less>::rotateLeftBig(typename AvlTree<T, less>::Node *top)
 {
     auto x = top;
     auto z = top->right;
@@ -146,17 +148,18 @@ void AvlTree<T, less>::rotateLeftBig(typename AvlTree<T, less>::Node *top)
     }
 
     y->balance = 0;
+    return y;
 }
 
 template <typename T, bool less(const T& t1, const T& t2)>
-void AvlTree<T, less>::rotateRightBig(typename AvlTree<T, less>::Node *top)
+typename AvlTree<T, less>::Node *AvlTree<T, less>::rotateRightBig(typename AvlTree<T, less>::Node *top)
 {
     auto x = top;
     auto z = top->left;
     auto y = z->right;
 
-    rotateRight(z);
-    rotateLeft(x);
+    rotateLeft(z);
+    rotateRight(x);
 
     if(y->balance < 0)
     {
@@ -175,6 +178,7 @@ void AvlTree<T, less>::rotateRightBig(typename AvlTree<T, less>::Node *top)
     }
 
     y->balance = 0;
+    return y;
 }
 
 template <typename T, bool less(const T& t1, const T& t2)>
@@ -198,13 +202,19 @@ void AvlTree<T, less>::insertFixup(typename AvlTree<T, less>::Node *top)
                 {
                     rotateLeftSmall(x);
                 }
-            }
-            else if(x->balance < 0)
-            {
-                x->balance = 0;
                 break;
             }
-            x->balance = 1;
+            else
+            {
+                if(x->balance < 0)
+                {
+                    x->balance = 0;
+                    break;
+                }
+                x->balance = 1;
+                z = x;
+                x = g;
+            }
         }
         else
         {
@@ -218,6 +228,7 @@ void AvlTree<T, less>::insertFixup(typename AvlTree<T, less>::Node *top)
                 {
                     rotateRightSmall(x);
                 }
+                break;
             }
             else
             {
@@ -227,10 +238,10 @@ void AvlTree<T, less>::insertFixup(typename AvlTree<T, less>::Node *top)
                     break;
                 }
                 x->balance = -1;
+                z = x;
+                x = g;
             }
         }
-        z = x;
-        x = g;
     }
 }
 
@@ -241,20 +252,23 @@ void AvlTree<T, less>::deleteLeaf(typename AvlTree<T, less>::Node *node)
     auto x = n->parent;
     while(x)
     {
-        //auto g = x->parent;
+        auto g = x->parent;
         if(x->left == n)
         {
             if(x->balance > 0)
             {
                 auto z = x->right;
-                if(z->balance < 0)
+                auto b = z->balance;
+                if(b < 0)
                 {
-                    rotateLeftBig(x);
+                    n = rotateLeftBig(x);
                 }
                 else
                 {
-                    rotateLeft(x);
+                    n = rotateLeftSmall(x);
                 }
+                if(b == 0)
+                    break;
             }
             else
             {
@@ -263,7 +277,9 @@ void AvlTree<T, less>::deleteLeaf(typename AvlTree<T, less>::Node *node)
                     x->balance = 1;
                     break;
                 }
+                n = x;
                 x->balance = 0;
+                x = x->parent;
             }
         }
         else
@@ -271,14 +287,17 @@ void AvlTree<T, less>::deleteLeaf(typename AvlTree<T, less>::Node *node)
             if(x->balance < 0)
             {
                 auto z = x->left;
-                if(z->balance > 0)
+                auto b = z->balance;
+                if(b > 0)
                 {
                     rotateRightBig(x);
                 }
                 else
                 {
-                    rotateRight(x);
+                    rotateRightSmall(x);
                 }
+                if(b == 0)
+                    break;
             }
             else
             {
@@ -287,10 +306,12 @@ void AvlTree<T, less>::deleteLeaf(typename AvlTree<T, less>::Node *node)
                     x->balance = -1;
                     break;
                 }
+                n = x;
                 x->balance = 0;
+                x = x->parent;
             }
         }
-        x = x->parent;
+        x = g;
     }
 }
 
@@ -408,11 +429,12 @@ void AvlTree<T, less>::insert(T&& key)
 template <typename T, bool less(const T& t1, const T& t2)>
 bool AvlTree<T, less>::remove(const T& key)
 {
+    typename Node::Inner *ignore;
     auto node = getNodeByKey(key);
     if(node == nullptr)
         return false;
     else if(node->other)
-        return node->remove(key);
+        return node->remove(key, ignore);
     else
     {
         deleteNode(node);
@@ -528,10 +550,26 @@ typename AvlTree<T, less>::iterator AvlTree<T, less>::upper_bound(const Key& key
 template <typename T, bool less(const T& t1, const T& t2)>
 typename AvlTree<T, less>::iterator AvlTree<T, less>::erase(typename AvlTree<T, less>::iterator it)
 {
-    auto tmp = it;
-    ++it;
-    erase(*tmp);
-    return it;
+    auto node = getNodeByKey(*it);
+    if(node == nullptr)
+    {
+        ++it;
+        return it;
+    }
+    else if(node->other)
+    {
+        typename Node::Inner *inn = nullptr;
+        if(node->remove(*it, inn))
+            return iterator(node, inn);
+        ++it;
+        return it;
+    }
+    else
+    {
+        ++it;
+        deleteNode(node);
+        return it;
+    }
 }
 
 template <typename T, bool less(const T& t1, const T& t2)>
@@ -547,4 +585,34 @@ typename AvlTree<T, less>::iterator AvlTree<T, less>::find(const Key& key) const
         ++pos;
     }
     return end();
+}
+
+template <typename T, bool less(const T& t1, const T& t2)>
+void AvlTree<T, less>::erase(const T& key)
+{
+    remove(key);
+}
+
+template <typename T, bool less(const T& t1, const T& t2)>
+int AvlTree<T, less>::invariant(typename AvlTree<T, less>::Node *start)
+{
+    if(!start)
+        return 0;
+
+    auto lh = invariant(start->left);
+    auto rh = invariant(start->right);
+    if(lh < 0 || rh < 0)
+        return -1;
+    if(rh - lh != start->balance)
+        return -1;
+    
+    if(lh > rh)
+        return lh + 1;
+    return rh + 1;
+}
+
+template <typename T, bool less(const T& t1, const T& t2)>
+bool AvlTree<T, less>::invariant()
+{
+    return !(invariant(root) < 0);
 }

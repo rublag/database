@@ -167,6 +167,7 @@ void Database::insert(Record &&record)
     }
     auto &grp = it->insert(std::move(record));
     names.insert(&grp);
+    assert( names.invariant() );
 }
 
 void Database::remove(const Query &query)
@@ -180,6 +181,19 @@ void Database::remove(const Query &query)
 
 typename Database::iterator Database::erase(typename Database::iterator it)
 {
+    if(it.uses == iterator::Uses::Name)
+    {
+        auto &record = *it;
+        auto name_it = names.find(record);
+
+        auto group_num = (*name_it)->group();
+        auto &group = *(groups.find(group_num));
+        name_it = names.erase(name_it);
+        group.erase(record);
+        it = iterator(name_it, it.query);
+        return it;
+    }
+    
     auto tmp = it;
     ++it;
     erase(*tmp);
@@ -224,6 +238,17 @@ void Database::erase(const Record &record)
 
     auto group_num = (*it)->group();
     auto &group = *(groups.find(group_num));
-    group.erase(record);
     names.erase(it);
+    group.erase(record);
+}
+
+Database::Database(std::istream &istr)
+{
+    static const size_t buffer_size = 1024;
+    char buffer[buffer_size];
+    int phone, group;
+    while(istr >> buffer >> phone >> group)
+    {
+        insert(Record(buffer, group, phone));
+    }
 }

@@ -1,6 +1,9 @@
 #ifndef DATABASE_H
 #define DATABASE_H
 
+#include <iostream>
+#include <fstream>
+
 #include "record.h"
 #include "groups.h"
 #include "external_index.h"
@@ -24,6 +27,9 @@ public:
     iterator select(Query query);
     iterator erase(iterator it);
     void erase(const Record &record);
+
+    Database(std::istream &istr);
+    Database() = default;
 };
 
 struct Database::Query
@@ -59,6 +65,7 @@ public:
     bool atEnd();
 
 private:
+    void satisfyPredicate();
     void getFirstMatch();
     bool match(const Record &record) const;
 };

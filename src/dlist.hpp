@@ -3,6 +3,12 @@
 #include <utility>
 
 template <typename T>
+DList<T>::~DList()
+{
+    clear();
+}
+
+template <typename T>
 DList<T>::DList()
 {
     ;
@@ -75,15 +81,6 @@ typename DList<T>::iterator DList<T>::insert(iterator p, rvalue_reference t)
         node->prev = tmp.pos;
     }
 
-    if(p != end())
-    {
-        p.pos->prev = node;
-    }
-    else
-    {
-        last = node;
-    }
-
     if(p != begin())
     {
         auto tmp = p;
@@ -94,6 +91,16 @@ typename DList<T>::iterator DList<T>::insert(iterator p, rvalue_reference t)
     {
         first = node;
     }
+
+    if(p != end())
+    {
+        p.pos->prev = node;
+    }
+    else
+    {
+        last = node;
+    }
+
     return iterator(node);
 }
 
@@ -123,6 +130,10 @@ typename DList<T>::iterator DList<T>::erase(typename DList<T>::iterator q)
     {
         next.pos->prev = pos->prev;
     }
+    else
+    {
+        last = last->prev;
+    }
 
     delete pos;
     return next;
@@ -131,9 +142,9 @@ typename DList<T>::iterator DList<T>::erase(typename DList<T>::iterator q)
 template <typename T>
 typename DList<T>::iterator DList<T>::erase(iterator q1, iterator q2)
 {
-    for(auto q = erase(q1); q != q2; q = erase(q))
+    while(q1 != q2)
     {
-        ;
+        q1 = erase(q1);
     }
     return q2;
 }

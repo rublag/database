@@ -42,11 +42,12 @@ void AvlTree<T, less>::Node::insert(T&& data)
 }
 
 template <typename T, bool less(const T& t1, const T& t2)>
-bool AvlTree<T, less>::Node::remove(const T& data)
+bool AvlTree<T, less>::Node::remove(const T& data, typename AvlTree<T, less>::Node::Inner *&inn)
 {
     assert(other);
     if(this->data == data)
     {
+        inn = nullptr;
         this->data = std::move(other->data);
         if(other->next)
         {
@@ -69,6 +70,9 @@ bool AvlTree<T, less>::Node::remove(const T& data)
         }
         if(n)
         {
+            bool end = true;
+            if(!n->next)
+                end = true;
             if(n->prev)
                 n->prev->next = n->next;
             if(n->next)
@@ -76,6 +80,7 @@ bool AvlTree<T, less>::Node::remove(const T& data)
             if(!n->prev)
                 other = n->next;
             delete n;
+            return end;
         }
         else // We did not find element
             return false;

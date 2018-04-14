@@ -4,12 +4,15 @@
 #include "command.h"
 #include "database.h"
 
+#include <ostream>
+
 class Engine
 {
+    std::ostream &ostr = std::cout;
 public:
     void runStatement(const Command &cmd);
 
-    Engine(Database &db);
+    Engine(Database &db, std::ostream &ostr = std::cout);
     
     Engine() = delete;
     Engine(const Engine&) = delete;

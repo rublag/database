@@ -59,7 +59,10 @@ Record::Record(char *name, int group, int phone)
     _phone = phone;
 }
 
-Record::~Record() {}
+Record::~Record()
+{
+    delete[] _name;
+}
 
 bool Record::operator==(const Record &rhs) const
 {

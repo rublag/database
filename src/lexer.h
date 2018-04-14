@@ -22,7 +22,8 @@ struct Token
         // Logic:
         And, Or,
         // Other:
-        EndSt, EndStream, LPar, RPar, ErrLexer, ErrStream, Comma, Nil, Word
+        EndSt, EndStream, LPar, RPar, ErrLexer, ErrStream, Comma, Nil, Word,
+        Stop
     } type;
     char *value;
 };

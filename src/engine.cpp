@@ -1,4 +1,5 @@
 #include <iostream>
+#include <ostream>
 
 #include "engine.h"
 #include "command.h"
@@ -10,11 +11,11 @@ static bool test_record(const Record &, const Command &)
     return true;
 }
 
-static void print_record(const Record &record, const Command &command)
+static void print_record(const Record &record, const Command &command, std::ostream &ostr = std::cout)
 {
     if(command.ast)
     {
-        std::cout << " Name: " << record.name() << " Group: " << record.group() << " Phone: " << record.phone() << std::endl;
+        ostr << " Name: " << record.name() << " Group: " << record.group() << " Phone: " << record.phone() << std::endl;
         return;
     }
 
@@ -23,19 +24,19 @@ static void print_record(const Record &record, const Command &command)
         switch(command.query[i])
         {
         case Command::Name:
-            std::cout << " Name: " << record.name();
+            ostr << " Name: " << record.name();
             break;
         case Command::Value:
-            std::cout << " Group: " << record.group();
+            ostr << " Group: " << record.group();
             break;
         case Command::Phone:
-            std::cout << " Phone: " << record.phone();
+            ostr << " Phone: " << record.phone();
             break;
         default:
             break;
         }
     }
-    std::cout << std::endl;
+    ostr << std::endl;
 }
 
 static void invert(Condition &cond)
@@ -112,7 +113,7 @@ static bool command_has_cond(const Command &command, Condition::Left left, Condi
 
 static Database::Query make_db_query(const Command &command)
 {
-    Database::Query query;
+    Database::Query query {};
     for(int i = 0; i < 3; ++i)
     {
         Database::Query::Operator tmp;
@@ -226,7 +227,7 @@ void Engine::action(const Command &command, bool remove)
         {
             auto &record = *it;
             if(test_record(record, command))
-                print_record(record, command);
+                print_record(record, command, ostr);
         }
     }
     else
@@ -235,4 +236,4 @@ void Engine::action(const Command &command, bool remove)
     }
 }
 
-Engine::Engine(Database &db) : database(db) {}
+Engine::Engine(Database &db, std::ostream &ostr) : database(db), ostr(ostr) {}

@@ -2,20 +2,40 @@
 
 void Group::Iterator::getFirstMatch()
 {
-    if(!end && !match(*(*this)))
-        ++(*this);
+    satisfyPredicate();
+}
+
+void Group::Iterator::satisfyPredicate()
+{
+    while(!end && !match(**this))
+    {
+        if(uses == Uses::Name)
+        {
+            ++names_iterator;
+            if(names_iterator.atEnd())
+                end = true;
+        }
+        else
+        {
+            ++records_iterator;
+            if(records_iterator.atEnd())
+                end = true;
+        }
+    }
 }
 
 Group::Iterator::Iterator() : uses(Uses::Nil) {}
 
 Group::Iterator::Iterator(InternalIndex::iterator lower, Query q) : query(q), names_iterator(lower), uses(Uses::Name)
 {
-    getFirstMatch();
+    end = names_iterator.atEnd();
+    satisfyPredicate();
 }
 
 Group::Iterator::Iterator(RecordList::iterator lower, Query q) : query(q), records_iterator(lower), uses(Uses::Records)
 {
-    getFirstMatch();
+    end = records_iterator.atEnd();
+    satisfyPredicate();
 }
 
 Record &Group::Iterator::operator*()
@@ -29,22 +49,17 @@ const typename Group::Iterator &Group::Iterator::operator++()
 {
     if(uses == Uses::Name)
     {
-        while(!end && !match(*(*this)))
-        {
-            ++names_iterator;
-            if(names_iterator.atEnd())
-                end = true;
-        }
+        ++names_iterator;
+        if(names_iterator.atEnd())
+            end = true;
     }
     else
     {
-        while(!end && !match(*(*this)))
-        {
-            ++records_iterator;
-            if(records_iterator.atEnd())
-                end = true;
-        }
+        ++records_iterator;
+        if(records_iterator.atEnd())
+            end = true;
     }
+    satisfyPredicate();
     return *this;
 }
 

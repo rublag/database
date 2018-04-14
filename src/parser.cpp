@@ -176,6 +176,20 @@ Command Parser::parseStatement()
         }
         return command;
     }
+    case Token::Stop:
+    {
+        // [stop]
+        command.type = Command::Stop;
+
+        // [stop][;]
+        token = lexer.nextToken();
+        if(token.type != Token::EndSt)
+        {
+            command.type = Command::ErrParser;
+            return command;
+        }
+        return command;
+    }
     case Token::Quit:
     {
         // [quit]

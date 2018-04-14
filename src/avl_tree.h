@@ -15,6 +15,8 @@ private:
     Node *root;
 
 public:
+    int invariant(Node *start);
+    bool invariant();
     class Iterator;
     class RecordIterator;
     using iterator = RecordIterator;
@@ -28,7 +30,7 @@ public:
 
     void insert(T&& data);
     bool remove(const T& data);
-    void erase(const T& data) {remove(data);}
+    void erase(const T& data);
     T *search(const T& data);
 
     iterator begin() const;
@@ -45,10 +47,10 @@ public:
     template <typename Key>
     iterator find(const Key &key) const;
 private:
-    void rotateLeftSmall(Node *);
-    void rotateLeftBig(Node *);
-    void rotateRightSmall(Node *);
-    void rotateRightBig(Node *);
+    Node *rotateLeftSmall(Node *);
+    Node *rotateLeftBig(Node *);
+    Node *rotateRightSmall(Node *);
+    Node *rotateRightBig(Node *);
     void rotateLeft(Node *);
     void rotateRight(Node *);
     void insertFixup(Node *);
@@ -76,7 +78,7 @@ struct AvlTree<T, less>::Node
     Node();
     ~Node();
     void insert(T&& data);
-    bool remove(const T& data);
+    bool remove(const T& data, Inner *&inn);
     T* find(const T& data);
     Node(const Node&) = delete;
     Node &operator=(const Node&) = delete;

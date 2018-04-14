@@ -27,6 +27,7 @@ class ExternalIndex : private AvlTree<Record*, less>
 
 public:
     using Base::iterator;
+    using Base::invariant;
     using Base::begin;
     using Base::end;
     using Base::insert;

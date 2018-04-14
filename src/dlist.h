@@ -45,13 +45,15 @@ public:
     iterator erase(iterator q);
     iterator erase(iterator q1, iterator q2);
     iterator clear();
+
+    ~DList();
 };
 
 template <typename T>
 struct DList<T>::Node 
 {
-    Node *next;
-    Node *prev;
+    Node *next = nullptr;
+    Node *prev = nullptr;
     T data;
     Node(T &&data) : data(std::move(data)) {}
 };

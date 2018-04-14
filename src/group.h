@@ -58,6 +58,7 @@ public:
 
 private:
     void getFirstMatch();
+    void satisfyPredicate();
     bool match(const Record &record) const;
 };
 

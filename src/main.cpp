@@ -6,17 +6,25 @@
 #include <string>
 #include <sstream>
 
-int main()
+int main(int argc, char *argv[])
 {
-    std::ios_base::sync_with_stdio(true);
+    std::ios_base::sync_with_stdio(false);
     Lexer l(std::cin);
     Parser p(l);
-    Database db;
+    std::ifstream istr;
+    istr.open(argv[1], std::ifstream::in);
+    Database db(istr);
     Engine eng(db);
     Command c = {};
     while(c.type != Command::Quit && !std::cin.eof())
     {
+        //std::cout << ">>> ";
         c = p.parseStatement();
-        eng.runStatement(c);
+        if(c.type == Command::ErrParser)
+        {
+            std::cout << "  Invalid command!" << std::endl;
+        }
+        else
+            eng.runStatement(c);
     }
 }

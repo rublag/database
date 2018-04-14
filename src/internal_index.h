@@ -21,6 +21,7 @@ class InternalIndex : AvlTree<RecordList::iterator, less>
 
 public:
     using Base::iterator;
+    using Base::invariant;
     using Base::begin;
     using Base::end;
     using Base::insert;
