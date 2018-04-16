@@ -150,7 +150,7 @@ typename DList<T>::iterator DList<T>::erase(iterator q1, iterator q2)
 }
 
 template <typename T>
-typename DList<T>::iterator DList<T>::clear()
+void DList<T>::clear()
 {
     erase(begin(), end());
 }

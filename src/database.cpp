@@ -4,6 +4,7 @@
 #include "groups.h"
 #include "group.h"
 #include "records.h"
+#include "test_like.h"
 
 bool Database::test(const Record &record, const Database::Query &query) const
 {
@@ -33,6 +34,10 @@ bool Database::test(const Record &record, const Database::Query &query) const
         break;
     case Query::Operator::Ge:
         if(std::strcmp(query.name, record.name()) < 0)
+            return false;
+        break;
+    case Query::Operator::Like:
+        if(!test_like(record.name(), query.name))
             return false;
         break;
     }
@@ -65,6 +70,8 @@ bool Database::test(const Record &record, const Database::Query &query) const
         if(query.group < record.group())
             return false;
         break;
+    default:
+        break;
     }
 
     switch(query.phoneOp)
@@ -94,6 +101,8 @@ bool Database::test(const Record &record, const Database::Query &query) const
     case Query::Operator::Ge:
         if(query.phone < record.phone())
             return false;
+        break;
+    default:
         break;
     }
     return true;
@@ -128,6 +137,9 @@ Group::Query Database::makeGroupQuery(Database::Query &query)
     case Query::Operator::Nil:
         gq.nameOp = Group::Query::Operator::Nil;
         break;
+    case Query::Operator::Like:
+        gq.nameOp = Group::Query::Operator::Like;
+        break;
     }
 
     switch(query.phoneOp)
@@ -151,6 +163,7 @@ Group::Query Database::makeGroupQuery(Database::Query &query)
         gq.phoneOp = Group::Query::Operator::Ge;
         break;
     case Query::Operator::Nil:
+    default:
         gq.phoneOp = Group::Query::Operator::Nil;
         break;
     }
@@ -209,6 +222,7 @@ typename Database::iterator Database::select(Database::Query query)
         case Query::Operator::Eq:
         case Query::Operator::Gt:
         case Query::Operator::Ge:
+        case Query::Operator::Like:
         {
             auto lower = names.lower_bound(query.name);
             auto it = iterator(lower, query);

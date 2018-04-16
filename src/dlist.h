@@ -44,7 +44,7 @@ public:
     iterator insert(rvalue_reference t);
     iterator erase(iterator q);
     iterator erase(iterator q1, iterator q2);
-    iterator clear();
+    void clear();
 
     ~DList();
 };

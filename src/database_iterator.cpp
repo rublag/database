@@ -1,4 +1,5 @@
 #include "database.h"
+#include "test_like.h"
 
 void Database::Iterator::getFirstMatch()
 {
@@ -107,6 +108,10 @@ bool Database::Iterator::match(const Record &record) const
         if(std::strcmp(query.name, record.name()) < 0)
             return false;
         break;
+    case Query::Operator::Like:
+        if(!test_like(record.name(), query.name))
+            return false;
+        break;
     default:
         return false;
     }
@@ -139,6 +144,8 @@ bool Database::Iterator::match(const Record &record) const
         if(query.phone < record.phone())
             return false;
         break;
+    default:
+        break;
     }
 
     switch(query.groupOp)
@@ -168,6 +175,8 @@ bool Database::Iterator::match(const Record &record) const
     case Query::Operator::Ge:
         if(query.group < record.group())
             return false;
+        break;
+    default:
         break;
     }
 

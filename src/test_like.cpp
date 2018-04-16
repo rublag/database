@@ -10,8 +10,9 @@ bool test_like(char *hs, char *n)
     {
         return test_like(hs+1, n+1);
     }
-    else
+    else if(*hs == *n)
     {
-        return *hs == *n;
+        return test_like(hs+1, n+1);
     }
+    return false;
 }

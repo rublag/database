@@ -6,9 +6,9 @@
 #include <string>
 #include <sstream>
 
-int main(int argc, char *argv[])
+int main(int, char *argv[])
 {
-    std::ios_base::sync_with_stdio(false);
+    //std::ios_base::sync_with_stdio(false);
     Lexer l(std::cin);
     Parser p(l);
     std::ifstream istr;

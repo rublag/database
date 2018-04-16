@@ -22,6 +22,7 @@ Group::iterator Group::select(Query query) const
         case Query::Operator::Eq:
         case Query::Operator::Gt:
         case Query::Operator::Ge:
+        case Query::Operator::Like:
         {
             auto it_inner = names.lower_bound(query.name);
             auto it = Iterator(it_inner, query);

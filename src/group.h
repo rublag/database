@@ -30,7 +30,7 @@ public:
 struct Group::Query
 {
     enum class Operator {
-        Nil = 0, Eq, Ne, Gt, Ge, Lt, Le
+        Nil = 0, Eq, Ne, Gt, Ge, Lt, Le, Like
     } nameOp, phoneOp;
     char *name;
     int  phone;

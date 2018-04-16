@@ -16,7 +16,6 @@
 
 int main(int argc, char *argv[])
 {
-    std::ios_base::sync_with_stdio(false);
     std::stringstream iss;
     std::stringstream oss;
     Lexer l(iss);
@@ -33,7 +32,7 @@ int main(int argc, char *argv[])
         return 2;
     }
 
-    struct addrinfo hints {};
+    struct addrinfo hints = addrinfo();
     struct addrinfo *result, *rp;
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_DGRAM;
@@ -57,7 +56,6 @@ int main(int argc, char *argv[])
         if(sock == -1)
             continue;
 
-        int reuseaddr = 1;
 
         if(bind(sock, rp->ai_addr, rp->ai_addrlen) == 0)
         {
@@ -151,7 +149,7 @@ int main(int argc, char *argv[])
                     len -= sl;
                 }
 
-                if(sendto(sock, str, sl, 0, (struct sockaddr*) &peer_addr, peer_addr_len) != sl)
+                if(sendto(sock, str, sl, 0, (struct sockaddr*) &peer_addr, peer_addr_len) != (ssize_t)sl)
                 {
                     fprintf(stderr, "Error sending response\n");
                 }

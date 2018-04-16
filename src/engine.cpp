@@ -15,7 +15,7 @@ static void print_record(const Record &record, const Command &command, std::ostr
 {
     if(command.ast)
     {
-        ostr << " Name: " << record.name() << " Group: " << record.group() << " Phone: " << record.phone() << std::endl;
+        ostr << " " << record.name() << " " << record.group() << " " << record.phone() << std::endl;
         return;
     }
 
@@ -24,13 +24,13 @@ static void print_record(const Record &record, const Command &command, std::ostr
         switch(command.query[i])
         {
         case Command::Name:
-            ostr << " Name: " << record.name();
+            ostr << " " << record.name();
             break;
         case Command::Value:
-            ostr << " Group: " << record.group();
+            ostr << " " << record.group();
             break;
         case Command::Phone:
-            ostr << " Phone: " << record.phone();
+            ostr << " " << record.phone();
             break;
         default:
             break;
@@ -113,10 +113,10 @@ static bool command_has_cond(const Command &command, Condition::Left left, Condi
 
 static Database::Query make_db_query(const Command &command)
 {
-    Database::Query query {};
+    Database::Query query = Database::Query();
     for(int i = 0; i < 3; ++i)
     {
-        Database::Query::Operator tmp;
+        Database::Query::Operator tmp = Database::Query::Operator::Nil;
         switch(command.cond[i].type)
         {
         case Condition::Eq:
@@ -169,7 +169,7 @@ void Engine::action(const Command &command, bool remove)
 {
     // dlist of groups. each groups contains container with records, avl for name and linear search for phone. Global avl for name.
 
-    if(command.cond[3].left != Condition::Left::Nil)
+    if(command.cond[2].left != Condition::Left::Nil)
     {
         // Unsupported
         std::cerr << "3 arguments for select are not supported at the moment." << std::endl;
@@ -236,4 +236,4 @@ void Engine::action(const Command &command, bool remove)
     }
 }
 
-Engine::Engine(Database &db, std::ostream &ostr) : database(db), ostr(ostr) {}
+Engine::Engine(Database &db, std::ostream &ostr) : ostr(ostr), database(db) {}
