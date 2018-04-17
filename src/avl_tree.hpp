@@ -380,6 +380,11 @@ void AvlTree<T, less>::swapParentChild(typename AvlTree<T, less>::Node *parent, 
     auto balance = parent->balance;
     parent->balance = child->balance;
     child->balance = balance;
+
+    if(root == parent)
+        root = child;
+    else if(root == child)
+        root = parent;
 }
 
 template <typename T, bool less(const T& t1, const T& t2)>
@@ -460,6 +465,11 @@ void AvlTree<T, less>::swapNodes(typename AvlTree<T, less>::Node *first, typenam
     auto balance = first->balance;
     first->balance = second->balance;
     second->balance = balance;
+
+    if(root == first)
+        root = second;
+    else if(root == second)
+        root = first;
 }
 
 template <typename T, bool less(const T& t1, const T& t2)>
@@ -470,6 +480,25 @@ void AvlTree<T, less>::deleteNode(typename AvlTree<T, less>::Node *node)
     auto left = node->left;
     auto right = node->right;
  
+    if(left == nullptr && right)
+    {
+        next = right;
+        
+        next->parent = parent;
+        if(parent)
+        {
+            if(parent->left == node)
+                parent->left = next;
+            else if(parent->right == node)
+                parent->right = next;
+        }
+        else if(root == node)
+            root = next;
+        deleteFixup(next);
+        delete node;
+//        if(!invariant()) printf("errl");
+        return;
+    }
     if(right == nullptr && left)
     {
         next = left;
@@ -486,7 +515,7 @@ void AvlTree<T, less>::deleteNode(typename AvlTree<T, less>::Node *node)
             root = next;
         deleteFixup(next);
         delete node;
-        if(!invariant()) printf("errl");
+//        if(!invariant()) printf("errl");
         return;
     }
     else if(right)
@@ -505,17 +534,23 @@ void AvlTree<T, less>::deleteNode(typename AvlTree<T, less>::Node *node)
         swapNodes(node, next);
     }
 
-    if(!invariant())
+    if(node->right)
+    {
+        deleteNode(node);
+        return;
+    }
+
+/*    if(!invariant())
     {
         printf("errinvbef\n");
-    }
+    }*/
 
     deleteFixup(node);
 
-    if(root && root->parent)
+/*    if(root && root->parent)
     {
         printf("errroot\n");
-    }
+    }*/
 
     if(node->parent)
     {
@@ -530,11 +565,11 @@ void AvlTree<T, less>::deleteNode(typename AvlTree<T, less>::Node *node)
         root = next;
     else
         assert(false);
-    if(!invariant())
+/*    if(!invariant())
     {
         assert(false);
         printf("INVERR\n");
-    }
+    }*/
     delete node;
 }
 
@@ -806,7 +841,7 @@ int AvlTree<T, less>::invariant(typename AvlTree<T, less>::Node *start)
     template <typename T, bool less(const T& t1, const T& t2)>
 bool AvlTree<T, less>::invariant()
 {
-    if(root->parent)
+    if(root && root->parent)
         return false;
     return !(invariant(root) < 0);
 }

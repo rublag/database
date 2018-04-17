@@ -25,6 +25,12 @@ int main(int, char *argv[])
             std::cout << "  Invalid command!" << std::endl;
         }
         else
+        {
+            /*if(c.cond[0].value == 9887221 || c.cond[1].value == 9887221)
+            {
+                printf("1\n");
+            }*/
             eng.runStatement(c);
+        }
     }
 }

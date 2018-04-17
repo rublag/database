@@ -180,7 +180,7 @@ void Database::insert(Record &&record)
     }
     auto &grp = it->insert(std::move(record));
     names.insert(&grp);
-    assert( names.invariant() );
+//    assert( names.invariant() );
 }
 
 void Database::remove(const Query &query)
@@ -265,6 +265,6 @@ Database::Database(std::istream &istr)
     {
         insert(Record(buffer, group, phone));
     }
-    if(names.invariant())
-        std::cout << "db inv ok" << std::endl;
+/*    if(names.invariant())
+        std::cout << "db inv ok" << std::endl;*/
 }
