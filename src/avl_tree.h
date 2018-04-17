@@ -54,10 +54,12 @@ private:
     void rotateLeft(Node *);
     void rotateRight(Node *);
     void insertFixup(Node *);
-    void deleteLeaf(Node *);
+    void deleteFixup(Node *);
     void deleteNode(Node *);
     Node *getNearestNodeByKey(const T& key);
     Node *getNodeByKey(const T& key);
+    void swapNodes(Node *, Node *);
+    void swapParentChild(Node *, Node *);
 };
 
 template <typename T, bool less(const T& t1, const T& t2)>

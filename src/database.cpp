@@ -265,4 +265,6 @@ Database::Database(std::istream &istr)
     {
         insert(Record(buffer, group, phone));
     }
+    if(names.invariant())
+        std::cout << "db inv ok" << std::endl;
 }

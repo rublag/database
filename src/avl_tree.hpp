@@ -246,7 +246,7 @@ void AvlTree<T, less>::insertFixup(typename AvlTree<T, less>::Node *top)
 }
 
 template <typename T, bool less(const T& t1, const T& t2)>
-void AvlTree<T, less>::deleteLeaf(typename AvlTree<T, less>::Node *node)
+void AvlTree<T, less>::deleteFixup(typename AvlTree<T, less>::Node *node)
 {
     auto n = node;
     auto x = n->parent;
@@ -279,7 +279,7 @@ void AvlTree<T, less>::deleteLeaf(typename AvlTree<T, less>::Node *node)
                 }
                 n = x;
                 x->balance = 0;
-                x = x->parent;
+                x = g;
             }
         }
         else
@@ -290,11 +290,11 @@ void AvlTree<T, less>::deleteLeaf(typename AvlTree<T, less>::Node *node)
                 auto b = z->balance;
                 if(b > 0)
                 {
-                    rotateRightBig(x);
+                    n = rotateRightBig(x);
                 }
                 else
                 {
-                    rotateRightSmall(x);
+                    n = rotateRightSmall(x);
                 }
                 if(b == 0)
                     break;
@@ -308,7 +308,7 @@ void AvlTree<T, less>::deleteLeaf(typename AvlTree<T, less>::Node *node)
                 }
                 n = x;
                 x->balance = 0;
-                x = x->parent;
+                x = g;
             }
         }
         x = g;
@@ -316,50 +316,160 @@ void AvlTree<T, less>::deleteLeaf(typename AvlTree<T, less>::Node *node)
 }
 
 template <typename T, bool less(const T& t1, const T& t2)>
+void AvlTree<T, less>::swapParentChild(typename AvlTree<T, less>::Node *parent, typename AvlTree<T, less>::Node *child)
+{
+    if(!parent || !child || child->parent != parent || !(parent->left == child || parent->right == child))
+    {
+        assert(false);
+        return;
+    }
+
+    auto parent_parent = parent->parent;
+    auto parent_left = parent->left;
+    auto parent_right = parent->right;
+    
+    auto child_left = child->left;
+    auto child_right = child->right;
+
+    if(child == parent_left)
+    {
+        parent->left = child_left;
+        if(child_left)
+            child_left->parent = parent;
+
+        parent->right = child_right;
+        if(child_right)
+            child_right->parent = parent;
+
+        child->parent = parent_parent;
+
+        child->left = parent;
+        parent->parent = child;
+        
+        child->right = parent_right;
+        if(parent_right)
+            parent_right->parent = child;
+    }
+    else
+    {
+        parent->left = child_left;
+        if(child_left)
+            child_left->parent = parent;
+
+        parent->right = child_right;
+        if(child_right)
+            child_right->parent = parent;
+
+        child->parent = parent_parent;
+        
+        child->right = parent;
+        parent->parent = child;
+
+        child->left = parent_left;
+        if(parent_left)
+            parent_left->parent = child;
+    }
+    if(parent_parent)
+    {
+        if(parent_parent->left == parent)
+            parent_parent->left = child;
+        else
+            parent_parent->right = child;
+    }
+
+    auto balance = parent->balance;
+    parent->balance = child->balance;
+    child->balance = balance;
+}
+
+template <typename T, bool less(const T& t1, const T& t2)>
+void AvlTree<T, less>::swapNodes(typename AvlTree<T, less>::Node *first, typename AvlTree<T, less>::Node *second)
+{
+    if(!first || !second)
+    {
+        assert(false);
+        return;
+    }
+
+    if(first->parent == second || second->parent == first)
+    {
+        if(first->parent == second)
+            swapParentChild(second, first);
+        else
+            swapParentChild(first, second);
+        return;
+    }
+
+    auto first_parent = first->parent;
+    auto first_left = first->left;
+    auto first_right = first->right;
+
+    auto second_parent = second->parent;
+    auto second_left = second->left;
+    auto second_right = second->right;
+
+    if(first_parent)
+    {
+        if(first_parent->left == first)
+            first_parent->left = second;
+        else if(first_parent->right == first)
+            first_parent->right = second;
+        else
+            assert(0);
+    }
+    
+    if(second_parent)
+    {
+        if(second_parent->left == second)
+            second_parent->left = first;
+        else if(second_parent->right == second)
+            second_parent->right = first;
+        else
+            assert(0);
+    }
+
+    if(first_left)
+    {
+        first_left->parent = second;
+    }
+
+    if(first_right)
+    {
+        first_right->parent = second;
+    }
+
+    if(second_left)
+    {
+        second_left->parent = first;
+    }
+
+    if(second_right)
+    {
+        second_right->parent = first;
+    }
+
+    first->parent = second_parent;
+    second->parent = first_parent;
+    
+    first->left = second_left;
+    second->left = first_left;
+
+    first->right = second_right;
+    second->right = first_right;
+
+    auto balance = first->balance;
+    first->balance = second->balance;
+    second->balance = balance;
+}
+
+template <typename T, bool less(const T& t1, const T& t2)>
 void AvlTree<T, less>::deleteNode(typename AvlTree<T, less>::Node *node)
 {
-/*
-    auto next = node;
-    auto left = node->left;
-    auto right = node->right;
-    if(right == nullptr)
-    {
-        next = left;
-    }
-    else
-    {
-        next = node->right;
-        while(next->left != nullptr)
-            next = next->left;
-    }
-
-    if(next)
-    {
-        node->data = std::move(next->data);
-        node->other = next->other;
-        next->other = nullptr;
-    }
-    else
-        next = node;
-
-    deleteLeaf(next);
-    
-    if(next->parent)
-    {
-        if(next->parent->left == next)
-            next->parent->left = nullptr;
-        else if(next->parent->right == next)
-            next->parent->right = nullptr;
-    }
-    else if(root == next)
-        root = nullptr;
-    delete next;
-*/
     auto next = node;
     auto parent = node->parent;
     auto left = node->left;
     auto right = node->right;
-    
+ 
     if(right == nullptr && left)
     {
         next = left;
@@ -374,9 +484,9 @@ void AvlTree<T, less>::deleteNode(typename AvlTree<T, less>::Node *node)
         }
         else if(root == node)
             root = next;
-        deleteLeaf(next);
+        deleteFixup(next);
         delete node;
-        if(!invariant()) printf("err");;
+        if(!invariant()) printf("errl");
         return;
     }
     else if(right)
@@ -392,59 +502,20 @@ void AvlTree<T, less>::deleteNode(typename AvlTree<T, less>::Node *node)
 
     if(next)
     {
-        if(node->left)
-        {
-            node->left->parent = next;
-        }
-        if(node->parent)
-        {
-            if(node->parent->left == node)
-                node->parent->left = next;
-            else if(node->parent->right == node)
-                node->parent->right = next;
-        }
-
-        if(next->parent == node)
-        {
-            next->parent = node->parent;
-            node->parent = next;
-            if(node->left == next)
-            {
-                node->left = next->left;
-                node->right = next->right;
-                next->left = node;
-                next->right = right;
-            }
-            else if(node->right == next)
-            {
-                node->left = next->left;
-                node->right = next->right;
-                next->right = node;
-                next->left = left;
-            }
-        }
-        else if(next->parent)
-        {
-            if(next->parent->left == next)
-                next->parent->left = node;
-            else if(next->parent->right == next)
-                next->parent->right = node;
-    
-            node->parent = next->parent;
-            node->left = next->left;
-            node->right = next->right;
-
-            next->parent = parent;
-            next->left = left;
-            next->right = right;
-        }
-
-        auto bal = node->balance;
-        node->balance = next->balance;
-        next->balance = bal;
+        swapNodes(node, next);
     }
 
-    deleteLeaf(node);
+    if(!invariant())
+    {
+        printf("errinvbef\n");
+    }
+
+    deleteFixup(node);
+
+    if(root && root->parent)
+    {
+        printf("errroot\n");
+    }
 
     if(node->parent)
     {
@@ -452,11 +523,19 @@ void AvlTree<T, less>::deleteNode(typename AvlTree<T, less>::Node *node)
             node->parent->left = nullptr;
         else if(node->parent->right == node)
             node->parent->right = nullptr;
+        else
+            assert(false);
     }
     else if(root == node)
         root = next;
+    else
+        assert(false);
+    if(!invariant())
+    {
+        assert(false);
+        printf("INVERR\n");
+    }
     delete node;
-    if(!invariant()) printf("err");;
 }
 
     template <typename T, bool less(const T& t1, const T& t2)>
@@ -651,7 +730,7 @@ typename AvlTree<T, less>::iterator AvlTree<T, less>::upper_bound(const Key& key
     return pos;
 }
 
-    template <typename T, bool less(const T& t1, const T& t2)>
+template <typename T, bool less(const T& t1, const T& t2)>
 typename AvlTree<T, less>::iterator AvlTree<T, less>::erase(typename AvlTree<T, less>::iterator it)
 {
     auto node = getNodeByKey(*it);
@@ -691,7 +770,7 @@ typename AvlTree<T, less>::iterator AvlTree<T, less>::find(const Key& key) const
     return end();
 }
 
-    template <typename T, bool less(const T& t1, const T& t2)>
+template <typename T, bool less(const T& t1, const T& t2)>
 void AvlTree<T, less>::erase(const T& key)
 {
     remove(key);
@@ -702,6 +781,15 @@ int AvlTree<T, less>::invariant(typename AvlTree<T, less>::Node *start)
 {
     if(!start)
         return 0;
+
+    if(start->parent == start || start->left == start || start->right == start)
+        return -1;
+
+    if(start->left && start->left->parent != start)
+        return -1;
+
+    if(start->right && start->right->parent != start)
+        return -1;
 
     auto lh = invariant(start->left);
     auto rh = invariant(start->right);
@@ -718,5 +806,7 @@ int AvlTree<T, less>::invariant(typename AvlTree<T, less>::Node *start)
     template <typename T, bool less(const T& t1, const T& t2)>
 bool AvlTree<T, less>::invariant()
 {
+    if(root->parent)
+        return false;
     return !(invariant(root) < 0);
 }

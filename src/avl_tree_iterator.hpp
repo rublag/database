@@ -86,10 +86,24 @@ typename AvlTree<T, less>::Node *AvlTree<T, less>::RecordIterator::nextNodePtr()
     }
 
     auto p = cur->parent;
+    if(!p)
+        return nullptr;
+
     while(p && cur == p->right)
     {
         cur = p;
         p = p->parent;
     }
-    return p;
+
+    if(!p) // only if came from right
+    {
+        return nullptr; // was at the end.
+    }
+    else if(cur == p->left)
+    {
+        cur = p;
+    }
+    else
+        assert(0);
+    return cur;
 }
