@@ -28,7 +28,8 @@ AvlTree<T, less>::Node::~Node()
 template <typename T, bool less(const T& t1, const T& t2)>
 void AvlTree<T, less>::Node::insert(T&& data)
 {
-    auto n = new Inner(std::move(data));
+    auto n = new Inner(std::move(this->data));
+    this->data = std::move(data);
     if(other)
     {
         other->prev = n;

@@ -768,7 +768,8 @@ typename AvlTree<T, less>::iterator AvlTree<T, less>::upper_bound(const Key& key
 template <typename T, bool less(const T& t1, const T& t2)>
 typename AvlTree<T, less>::iterator AvlTree<T, less>::erase(typename AvlTree<T, less>::iterator it)
 {
-    auto node = getNodeByKey(*it);
+    //auto node = getNodeByKey(*it);
+    auto node = it.pos;
     if(node == nullptr)
     {
         ++it;
