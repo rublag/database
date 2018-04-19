@@ -67,6 +67,6 @@ public:
 private:
     void satisfyPredicate();
     void getFirstMatch();
-    bool match(const Record &record) const;
+    bool match(const Record &record, int *name_res = nullptr) const;
 };
 #endif

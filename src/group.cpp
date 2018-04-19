@@ -9,7 +9,7 @@ Record &Group::insert(Record &&record)
 {
     auto it = records.insert(std::move(record));
     names.insert(std::move(it));
-    assert( names.invariant() );
+    //assert( names.invariant() );
     return *it;
 }
 

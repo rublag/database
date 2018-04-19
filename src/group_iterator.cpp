@@ -64,43 +64,105 @@ const typename Group::Iterator &Group::Iterator::operator++()
     return *this;
 }
 
-bool Group::Iterator::match(const Record &record) const
+bool Group::Iterator::match(const Record &record, int *name_res) const
 {
+    if(name_res)
+        *name_res = 0;
+
     switch(query.nameOp)
     {
     case Query::Operator::Nil:
         break;
     case Query::Operator::Eq:
-        if(std::strcmp(query.name, record.name()) != 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp < 0)
+        {
+            if(name_res)
+            {
+                *name_res = -1;
+            }
             return false;
+        }
+        else if(cmp > 0)
+        {
+            if(name_res)
+                *name_res = -2;
+            return false;
+        }
         break;
+    }
     case Query::Operator::Ne:
-        if(std::strcmp(query.name, record.name()) == 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp == 0)
+        {
+            if(name_res)
+            {
+                *name_res = -1;
+            }
             return false;
+        }
         break;
+    }
     case Query::Operator::Lt:
-        if(std::strcmp(query.name, record.name()) >= 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp >= 0)
+        {
+            if(name_res)
+                *name_res = -2;
             return false;
+        }
         break;
+    }
     case Query::Operator::Le:
-        if(std::strcmp(query.name, record.name()) > 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp > 0)
+        {
+            if(name_res)
+                *name_res = -2;
             return false;
+        }
         break;
+    }
     case Query::Operator::Gt:
-        if(std::strcmp(query.name, record.name()) <= 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp <= 0)
+        {
+            if(name_res)
+            {
+                *name_res = -1;
+            }
             return false;
+        }
         break;
+    }
     case Query::Operator::Ge:
-        if(std::strcmp(query.name, record.name()) < 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp < 0)
+        {
+            if(name_res)
+            {
+                *name_res = -1;
+            }
             return false;
+        }
         break;
+    }
     case Query::Operator::Like:
+    {
         if(!test_like(record.name(), query.name))
             return false;
         break;
+    }
     default:
         return false;
     }
+
 
     switch(query.phoneOp)
     {

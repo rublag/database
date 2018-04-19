@@ -10,9 +10,16 @@ void Database::Iterator::satisfyPredicate()
 {
     if(uses == Uses::Name)
     {
-        while(!end && !match(**this))
+        int name_res = 0;
+        while(!end && !match(**this, &name_res))
         {
-            ++names_iterator;
+            if(name_res == 0)
+                ++names_iterator;
+            else if(name_res == -1)
+                names_iterator.nextNode();
+            else if(name_res == -2)
+                end = true;
+            
             if(names_iterator.atEnd())
                 end = true;
         }
@@ -21,6 +28,17 @@ void Database::Iterator::satisfyPredicate()
     {
         while(!end)
         {
+            if(!groups_iterator.atEnd())
+            {
+                if( (query.groupOp == Query::Operator::Eq && groups_iterator->group() > query.group) ||
+                    (query.groupOp == Query::Operator::Lt && groups_iterator->group() >= query.group) ||
+                    (query.groupOp == Query::Operator::Le && groups_iterator->group() > query.group) 
+                  )
+                {
+                    end = true;
+                    break;
+                }
+            }
             if(group_iterator.atEnd())
             {
                 ++groups_iterator;
@@ -78,40 +96,101 @@ const typename Database::Iterator &Database::Iterator::operator++()
     return *this;
 }
 
-bool Database::Iterator::match(const Record &record) const
+bool Database::Iterator::match(const Record &record, int *name_res) const
 {
+    if(name_res)
+        *name_res = 0;
+
     switch(query.nameOp)
     {
     case Query::Operator::Nil:
         break;
     case Query::Operator::Eq:
-        if(std::strcmp(query.name, record.name()) != 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp < 0)
+        {
+            if(name_res)
+            {
+                *name_res = -1;
+            }
             return false;
+        }
+        else if(cmp > 0)
+        {
+            if(name_res)
+                *name_res = -2;
+            return false;
+        }
         break;
+    }
     case Query::Operator::Ne:
-        if(std::strcmp(query.name, record.name()) == 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp == 0)
+        {
+            if(name_res)
+            {
+                *name_res = -1;
+            }
             return false;
+        }
         break;
+    }
     case Query::Operator::Lt:
-        if(std::strcmp(query.name, record.name()) >= 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp >= 0)
+        {
+            if(name_res)
+                *name_res = -2;
             return false;
+        }
         break;
+    }
     case Query::Operator::Le:
-        if(std::strcmp(query.name, record.name()) > 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp > 0)
+        {
+            if(name_res)
+                *name_res = -2;
             return false;
+        }
         break;
+    }
     case Query::Operator::Gt:
-        if(std::strcmp(query.name, record.name()) <= 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp <= 0)
+        {
+            if(name_res)
+            {
+                *name_res = -1;
+            }
             return false;
+        }
         break;
+    }
     case Query::Operator::Ge:
-        if(std::strcmp(query.name, record.name()) < 0)
+    {
+        auto cmp = std::strcmp(query.name, record.name());
+        if(cmp < 0)
+        {
+            if(name_res)
+            {
+                *name_res = -1;
+            }
             return false;
+        }
         break;
+    }
     case Query::Operator::Like:
+    {
         if(!test_like(record.name(), query.name))
             return false;
         break;
+    }
     default:
         return false;
     }

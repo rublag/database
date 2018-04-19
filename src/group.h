@@ -59,7 +59,7 @@ public:
 private:
     void getFirstMatch();
     void satisfyPredicate();
-    bool match(const Record &record) const;
+    bool match(const Record &record, int *name_res = nullptr) const;
 };
 
 bool operator==(const Group &g, int i);
