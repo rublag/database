@@ -107,7 +107,7 @@ bool Database::Iterator::match(const Record &record, int *name_res) const
         break;
     case Query::Operator::Eq:
     {
-        auto cmp = std::strcmp(query.name, record.name());
+        auto cmp = std::strcmp(record.name(), query.name);
         if(cmp < 0)
         {
             if(name_res)
@@ -126,7 +126,7 @@ bool Database::Iterator::match(const Record &record, int *name_res) const
     }
     case Query::Operator::Ne:
     {
-        auto cmp = std::strcmp(query.name, record.name());
+        auto cmp = std::strcmp(record.name(), query.name);
         if(cmp == 0)
         {
             if(name_res)
@@ -139,7 +139,7 @@ bool Database::Iterator::match(const Record &record, int *name_res) const
     }
     case Query::Operator::Lt:
     {
-        auto cmp = std::strcmp(query.name, record.name());
+        auto cmp = std::strcmp(record.name(), query.name);
         if(cmp >= 0)
         {
             if(name_res)
@@ -150,7 +150,7 @@ bool Database::Iterator::match(const Record &record, int *name_res) const
     }
     case Query::Operator::Le:
     {
-        auto cmp = std::strcmp(query.name, record.name());
+        auto cmp = std::strcmp(record.name(), query.name);
         if(cmp > 0)
         {
             if(name_res)
@@ -161,7 +161,7 @@ bool Database::Iterator::match(const Record &record, int *name_res) const
     }
     case Query::Operator::Gt:
     {
-        auto cmp = std::strcmp(query.name, record.name());
+        auto cmp = std::strcmp(record.name(), query.name);
         if(cmp <= 0)
         {
             if(name_res)
@@ -174,7 +174,7 @@ bool Database::Iterator::match(const Record &record, int *name_res) const
     }
     case Query::Operator::Ge:
     {
-        auto cmp = std::strcmp(query.name, record.name());
+        auto cmp = std::strcmp(record.name(), query.name);
         if(cmp < 0)
         {
             if(name_res)
